@@ -43,7 +43,7 @@ class LoginWidget extends StatelessWidget {
   }
 
   Future<UserCredential> signInWithKakao() async {
-    final clientState = Uuid().v4();
+    final clientState = const Uuid().v4();
     final url = Uri.https('kauth.kakao.com', '/oauth/authorize', {
       'response_type': 'code',
       'client_id': '98d9f710fd3b6aba07b3fe2135aa2edd',
@@ -72,6 +72,42 @@ class LoginWidget extends StatelessWidget {
     var responseCustomToken = await http.post(
         Uri.parse(
             'https://periodic-hushed-beet.glitch.me/callbacks/kakao/token'),
+        body: {'accessToken': accessTokenResult['access_token']});
+
+    return await FirebaseAuth.instance
+        .signInWithCustomToken(responseCustomToken.body);
+  }
+
+  Future<UserCredential> signInWithNaver() async {
+    final clientState = const Uuid().v4();
+    final url = Uri.https('nid.naver.com', '/oauth2.0/authorize', {
+      'response_type': 'code',
+      'client_id': 'dxZulrlRpG5MUlUF8KqL',
+      'response_mode': 'form_post',
+      'redirect_uri':
+          'https://periodic-hushed-beet.glitch.me/callbacks/naver/sign_in',
+      'state': clientState,
+    });
+
+    final result = await FlutterWebAuth.authenticate(
+        url: url.toString(), callbackUrlScheme: 'webauthcallback');
+    final body = Uri.parse(result).queryParameters;
+    print(body);
+
+    final tokenUrl = Uri.https('nid.naver.com', '/oauth2.0/token', {
+      'grant_type': 'authorization_code',
+      'client_id': 'dxZulrlRpG5MUlUF8KqL',
+      'client_secret': 'p5yzBmNz2V',
+      'state': clientState,
+      'code': body['code'],
+    });
+
+    var response = await http.post(tokenUrl);
+    Map<String, dynamic> accessTokenResult = jsonDecode(response.body);
+    print(accessTokenResult['access_token']);
+    var responseCustomToken = await http.post(
+        Uri.parse(
+            'https://periodic-hushed-beet.glitch.me/callbacks/naver/token'),
         body: {'accessToken': accessTokenResult['access_token']});
 
     return await FirebaseAuth.instance
@@ -107,6 +143,14 @@ class LoginWidget extends StatelessWidget {
             TextButton(
               onPressed: signInWithKakao,
               child: const Text('Kakao login'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey.withOpacity(0.3),
+                primary: Colors.black,
+              ),
+            ),
+            TextButton(
+              onPressed: signInWithNaver,
+              child: const Text('Naver login'),
               style: TextButton.styleFrom(
                 backgroundColor: Colors.grey.withOpacity(0.3),
                 primary: Colors.black,
