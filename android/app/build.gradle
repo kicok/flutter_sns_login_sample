@@ -69,4 +69,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.10"
     implementation platform('com.google.firebase:firebase-bom:29.0.2')
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 }

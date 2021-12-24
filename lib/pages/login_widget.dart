@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
 
 //https://firebase.flutter.dev/docs/auth/social 에서 코드 복사해옴
 class LoginWidget extends StatelessWidget {
@@ -37,6 +42,42 @@ class LoginWidget extends StatelessWidget {
     return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
   }
 
+  Future<UserCredential> signInWithKakao() async {
+    final clientState = Uuid().v4();
+    final url = Uri.https('kauth.kakao.com', '/oauth/authorize', {
+      'response_type': 'code',
+      'client_id': '98d9f710fd3b6aba07b3fe2135aa2edd',
+      'response_mode': 'form_post',
+      'redirect_uri':
+          'https://periodic-hushed-beet.glitch.me/callbacks/kakao/sign_in',
+      'state': clientState,
+    });
+
+    final result = await FlutterWebAuth.authenticate(
+        url: url.toString(), callbackUrlScheme: 'webauthcallback');
+    final body = Uri.parse(result).queryParameters;
+    print(body);
+
+    final tokenUrl = Uri.https('kauth.kakao.com', '/oauth/token', {
+      'grant_type': 'authorization_code',
+      'client_id': '98d9f710fd3b6aba07b3fe2135aa2edd',
+      'redirect_uri':
+          'https://periodic-hushed-beet.glitch.me/callbacks/kakao/sign_in',
+      'code': body['code'],
+    });
+
+    var response = await http.post(tokenUrl);
+    Map<String, dynamic> accessTokenResult = jsonDecode(response.body);
+    print(accessTokenResult['access_token']);
+    var responseCustomToken = await http.post(
+        Uri.parse(
+            'https://periodic-hushed-beet.glitch.me/callbacks/kakao/token'),
+        body: {'accessToken': accessTokenResult['access_token']});
+
+    return await FirebaseAuth.instance
+        .signInWithCustomToken(responseCustomToken.body);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +99,14 @@ class LoginWidget extends StatelessWidget {
             TextButton(
               onPressed: signInWithFacebook,
               child: const Text('Facebook login'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey.withOpacity(0.3),
+                primary: Colors.black,
+              ),
+            ),
+            TextButton(
+              onPressed: signInWithKakao,
+              child: const Text('Kakao login'),
               style: TextButton.styleFrom(
                 backgroundColor: Colors.grey.withOpacity(0.3),
                 primary: Colors.black,
