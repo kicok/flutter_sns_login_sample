@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sns_login_sample/pages/my_page.dart';
 
 import 'login_widget.dart';
 
@@ -15,22 +16,23 @@ class Home extends StatelessWidget {
           if (!snapshot.hasData) {
             return const LoginWidget();
           } else {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('${snapshot.data.displayName}님 환영합니다.'),
-                  TextButton(
-                    onPressed: FirebaseAuth.instance.signOut,
-                    child: const Text('로그아웃'),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.grey.withOpacity(0.3),
-                      primary: Colors.black,
-                    ),
-                  )
-                ],
-              ),
-            );
+            return const MyPage();
+            // return Center(
+            //   child: Column(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       Text('${snapshot.data.displayName}님 환영합니다.'),
+            //       TextButton(
+            //         onPressed: FirebaseAuth.instance.signOut,
+            //         child: const Text('로그아웃'),
+            //         style: TextButton.styleFrom(
+            //           backgroundColor: Colors.grey.withOpacity(0.3),
+            //           primary: Colors.black,
+            //         ),
+            //       )
+            //     ],
+            //   ),
+            // );
           }
         },
       ),

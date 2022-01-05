@@ -114,6 +114,41 @@ class LoginWidget extends StatelessWidget {
         .signInWithCustomToken(responseCustomToken.body);
   }
 
+  /////////////// Email & Password SingUp, SingIn ///////////////////////
+  // 반드시 firebase 의 Authentication 에서 [Sign-in method]에서 [새 제공업체 추가]를 눌러 이메일/비밀번호 의 사용설정을 해야 사용할수 있음
+
+  void _signUp() async {
+    print('signUp');
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: "barry.allen@example.com", password: "SuperSecretPassword!");
+    } on FirebaseAuthException catch (e) {
+      print("FirebaseAuthException");
+
+      if (e.code == 'weak-password') {
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        print('The account already exists for that email.');
+      }
+    } catch (e) {
+      print("catch");
+    }
+  }
+
+  void _signIn() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: "barry.allen@example.com", password: "SuperSecretPassword!");
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
+  }
+  ///////////////////////////////////////////////////////////////
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,38 +159,69 @@ class LoginWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
-              onPressed: signInWithGoogle,
-              child: const Text('Google login'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey.withOpacity(0.3),
-                primary: Colors.black,
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "~~~~~~~ Social 로그인 ~~~~~~~~~",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: signInWithGoogle,
+                    child: const Text('Google login'),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey.withOpacity(0.3),
+                      primary: Colors.black,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: signInWithFacebook,
+                    child: const Text('Facebook login'),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey.withOpacity(0.3),
+                      primary: Colors.black,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: signInWithKakao,
+                    child: const Text('Kakao login'),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey.withOpacity(0.3),
+                      primary: Colors.black,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: signInWithNaver,
+                    child: const Text('Naver login'),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey.withOpacity(0.3),
+                      primary: Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ),
-            TextButton(
-              onPressed: signInWithFacebook,
-              child: const Text('Facebook login'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey.withOpacity(0.3),
-                primary: Colors.black,
-              ),
-            ),
-            TextButton(
-              onPressed: signInWithKakao,
-              child: const Text('Kakao login'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey.withOpacity(0.3),
-                primary: Colors.black,
-              ),
-            ),
-            TextButton(
-              onPressed: signInWithNaver,
-              child: const Text('Naver login'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey.withOpacity(0.3),
-                primary: Colors.black,
-              ),
-            ),
+            Expanded(
+                child: Column(
+              children: [
+                const Divider(
+                  thickness: 10,
+                ),
+                const Text(
+                  "기타 개별 Email/password 회원가입 및 로그인",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+                ElevatedButton(onPressed: _signUp, child: const Text("회원가입")),
+                ElevatedButton(onPressed: _signIn, child: const Text("로그인")),
+              ],
+            ))
           ],
         ),
       ),
